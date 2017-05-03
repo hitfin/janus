@@ -2,7 +2,7 @@
 
 module.exports = function(PortCall) {
 
-  PortCall.getRoutes = function(etd, eta, cb) {
+  PortCall.getRoutes = function(etd, eta, ts, cb) {
     // For more information on how to query data in loopback please see
     // https://docs.strongloop.com/display/public/LB/Querying+data
     const query = {
@@ -20,10 +20,35 @@ module.exports = function(PortCall) {
 
     PortCall.find(query)
       .then(calls => {
-        // TODO: convert port calls to voyages/routes
-        console.log(calls);
 
-        return cb(null, calls);
+        var voyages = []
+        if (!ts) {
+          var callsByRoute = calls.reduce((grouped, call) => {
+            grouped[call.routeId] = grouped[call.routeId] || [];
+            grouped[call.routeId].push(call);
+            return grouped;
+          }, {});
+
+
+          for (let routeId of Object.keys(callsByRoute)) {
+            let routeCalls = callsByRoute[routeId]
+
+            for (let [index, routeCall] of routeCalls.entries()) {
+              for (var destinationIndex = index + 1; destinationIndex < routeCalls.length; destinationIndex++) {
+                voyages.push({"routeId": routeId, "startPort": routeCall.port, "destinationPort":routeCalls[destinationIndex].port})
+              }
+            }
+          }
+        } else {
+          for (let [index, call] of calls.entries()) {
+            for (var destinationIndex = index + 1; destinationIndex < calls.length; destinationIndex++) {
+              voyages.push({"routeId": call.routeId, "startPort": call.port, "destinationPort":calls[destinationIndex].port})
+            }
+          }
+        }
+
+
+        return cb(null, voyages);
       })
       .catch(err => {
         console.log(err);
@@ -35,7 +60,8 @@ module.exports = function(PortCall) {
   PortCall.remoteMethod('getRoutes', {
     accepts: [
       { arg: 'etd', 'type': 'date' },
-      { arg: 'eta', 'type': 'date' }
+      { arg: 'eta', 'type': 'date' },
+      { arg: 'ts', 'type': 'boolean'}
     ],
     returns: [
       { arg: 'routes', type: 'array', root: true }

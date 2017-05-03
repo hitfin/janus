@@ -29,10 +29,18 @@
         is-open="ctrl.isEtaOpen" />
     </div>
 
+    <div class="form-group">
+      <label>Enable Transshipment</label>
+      <input
+        type="checkbox"
+        class="form-control"
+        ng-model="ctrl.ts" />
+    </div>
+
     <button
       type="submit"
       class="btn btn-primary"
-      ng-click="ctrl.getRoutes(ctrl.etd, ctrl.eta)">
+      ng-click="ctrl.getRoutes(ctrl.etd, ctrl.eta, ctrl.ts)">
       Find
     </button>
 
@@ -43,18 +51,18 @@
          ng-show="ctrl.voyages.length">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Port</th>
-        <th>ETA</th>
-        <th>ETD</th>
+        <th>Route ID</th>
+        <th>Start Port</th>
+        <th>Destination Port</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="voyage in ctrl.voyages">
-        <th>{{ voyage.id }}</th>
-        <td>{{ voyage.port }}</td>
-        <td>{{ (voyage.eta | date) || 'N/A' }}</td>
-        <td>{{ (voyage.etd | date) || 'N/A' }}</td>
+        <th>{{ voyage.routeId }}</th>
+        <td>{{ voyage.startPort }}</td>
+        <td>{{ voyage.destinationPort }}</td>
+        <!--<td>{{ (voyage.eta | date) || 'N/A' }}</td>
+        <td>{{ (voyage.etd | date) || 'N/A' }}</td>-->
       </tr>
     </tbody>
   </table>
